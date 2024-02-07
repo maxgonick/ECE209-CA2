@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import subprocess
-import string
 
 
 class solution:
@@ -47,56 +46,35 @@ class solution:
         pwd_checker_exe_result = p2.communicate()[0].decode()
         return pwd_checker_exe_result
 
-    def example(self):
-        # The following shows how to call a executable file in python and capture its output
-        # You can modify it to test your ideas
-        alphabet = list(string.ascii_lowercase + string.ascii_uppercase)
-        rightanswers = []
-        i = 1 
-        # You can print the output for debug or test.
-        while i != -1:
-            for letter in alphabet:
-                mem_ctl_exe_result = self.setProtectMem(i, 1000)
-                # print(mem_ctl_exe_result)
-                pwd_checker_exe_result = self.checkPassword(
-                    "".join(rightanswers) + letter
-                )
-                #If we hit a SEG ERROR 
-                if pwd_checker_exe_result == "SEG ERROR":
-                    i += 1
-                    rightanswers.append(letter)
-                    break
-                #If we reach the end of the alphabet and nothing works that means we reached the end of the password
-                if letter == "Z":
-                    i = -1
-        self.password = "".join(rightanswers)
-        print(self.password)
-        # print(pwd_checker_exe_result)
-        # After mem_ctl.exe executed, the memory in range [start_index, end_index] will be set to can not be accessed.
-        # That means, password_check.exe will not accessible this section of memory.
-        # Any read or write from password_check.exe to this range will cause an "SEG ERROR"
-
-        # You can print the output for debug or test.
-
-        # For password_checker.exe, the password you input will be stored from the beginning of the memory.
-        # Take the above parameters as input, the memory structure is shown below:
-
-        # index:        0--------------------100----------------------------------1000----------1023
-        # access type:  |-----accessible------|---------cannot be accessed----------|--accessible--|
-        # value:        guess\0#####################################################################
-
-        print(self.password)
-
     def getPassword(self):
         # Please complete this method
         # It should be the return the correct password in a string
         # You should modify the start_index, end_index and password appropriately to achieve the attack
         # GradeScope will import your class, and call this method to get the password you calculated.
-        pass
 
+        # All printable ASCII characters that would be inside the password
+        alphabet = [chr(i) for i in range(32, 127)]
+        rightanswers = []
+        i = 1
+        while True:
+            for letter in alphabet:
+                # incrementally block of memory to see if we can get the program to SEG-FAULT
+                mem_ctl_exe_result = self.setProtectMem(i, 1000)
+                pwd_checker_exe_result = self.checkPassword(
+                    "".join(rightanswers) + letter
+                )
+                # If we segfault then our guess was correct and we can move forward to the next cell
+                if pwd_checker_exe_result == "SEG ERROR":
+                    i += 1
+                    rightanswers.append(letter)
+                    break
+                # If we reach the end of the alphabet and nothing works that means we reached the end of the password
+                if pwd_checker_exe_result == "Correct":
+                    rightanswers.append(letter)
+                    self.password = "".join(rightanswers)
+                    return self.password
 
-sol = solution()
-sol.example()
 
 # Write Up
 # Please explain your solution
+# My strategy was that by blocking off all but the first cell of memory, we could tell if the first character of our password was correct. If we simply get "Wrong" then we know that first character was incorrect. However if we seg-fault that means we reached the 2nd cell of the password, thus the first cell was correct. We can simply brute-force this solution using every printable ASCII character and incrementally figure out the correct value for each cell until we have the correct password.
