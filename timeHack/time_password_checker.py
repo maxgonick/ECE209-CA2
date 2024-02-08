@@ -2,7 +2,7 @@
 
 import time
 
-correct_password = "vw4SE(f)"
+correct_password = "vw4h"
 padding = "                    "
 
 

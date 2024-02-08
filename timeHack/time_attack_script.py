@@ -38,41 +38,28 @@ class solution:
             temp.append(T2 - T1)
         return median(temp)
 
-    def getHeuristic(self, prev):
-        heuristic = []
-        alphabet = [chr(i) for i in range(32, 127)]
-        for letter in alphabet:
-            letter_time = self.median_time_diff("".join(prev) + letter)
-            heuristic.append(letter_time)
-        return heuristic
-
     def getPassword(self):
         right_letters = []
         while True:
-            heuristic = self.getHeuristic(right_letters)
-            if "prevHeuristic" in locals():
-                if abs(median(heuristic) - prevHeuristic) < 1e-6:
-                    break
-            prevHeuristic = median(heuristic)
             alphabet = [chr(i) for i in range(32, 127)]
+            time_collection = []
+            # For each letter calculate the median time of 10,000 trials, then select the character that had the largest median time
             for letter in alphabet:
                 median_time = self.median_time_diff("".join(right_letters) + letter)
-                print(median_time, median(heuristic), letter)
-                t_test, p_test = ttest_1samp(heuristic, median_time)
-                if p_test < 0.01 and (median_time > median(heuristic)):
-                    right_letters.append(letter)
-                    print(right_letters, median_time)
-                    break
-        # Now brute force the last letter
-        for letter in alphabet:
-            result = check_password("".join(right_letters) + letter)
-            print(result, letter)
-            if result == "Correct":
-                self.password = "".join(right_letters) + letter
-                return "".join(right_letters) + letter
+                # print(median_time, letter)
+                time_collection.append((median_time, letter))
+            # Find the letter that made the highest median time
+            right_letters.append(max(time_collection, key=lambda x: x[0])[1])
+            mostTime = max(time_collection, key=lambda x: x[0])
+            leastTime = min(time_collection, key=lambda x: x[0])
+            print(mostTime[0] - leastTime[0], mostTime[1], leastTime[1])
+            print(right_letters)
+
             # Please complete this method
         # It should be the return the correct password in a string
         # GradeScope will import your class, and call this method to get the password you calculated.
+        self.password = "".join(right_letters)
+        return self.password
         pass
 
 
