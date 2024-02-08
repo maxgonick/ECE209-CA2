@@ -2,9 +2,10 @@
 
 import time
 
-correct_password = "8jf&2"
+correct_password = "vw4SE(f)"
 padding = "                    "
-        
+
+
 def check_password(pwd):
     pwd += padding
     correct_pwd_len = len(correct_password)
