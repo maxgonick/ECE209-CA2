@@ -2,7 +2,7 @@
 
 import time
 
-correct_password = "sa89ef#!"
+correct_password = "*JfuH3-*86d"
 padding = "                    "
 
 
